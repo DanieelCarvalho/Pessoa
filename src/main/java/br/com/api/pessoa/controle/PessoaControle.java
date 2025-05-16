@@ -1,8 +1,6 @@
 package br.com.api.pessoa.controle;
 
-import java.util.Optional;
-
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -11,9 +9,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-
 import br.com.api.pessoa.modelo.PessoaModelo;
-import br.com.api.pessoa.repositorio.PessoaRepositorio;
+import br.com.api.pessoa.repositorio.servico.PessoaServico;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 
 
@@ -23,7 +21,7 @@ import lombok.RequiredArgsConstructor;
 public class PessoaControle {
 
     //@Autowired 1° maneira de injetar dependência
-    private final PessoaRepositorio pr;
+    private final PessoaServico ps;
     
     // @Autowired 2° maneira de injetar dependência
     // public void setPessoaRepositorio(PessoaRepositorio pr){
@@ -38,61 +36,48 @@ public class PessoaControle {
 
     //Rota responsável pela listagem de pessoas
     @GetMapping("/")
-    public Iterable<PessoaModelo> listarPessoas(){
-        return this.pr.findAll();
+    public ResponseEntity<Iterable<PessoaModelo>> listarPessoas(){
+
+       return this.ps.listarPessoas();
     }
 
     //Rota responsável pelo cadastro de pessoas
     @PostMapping("/")
-    public PessoaModelo cadastrarPessoa(@RequestBody PessoaModelo pm){
+    public ResponseEntity<PessoaModelo> cadastrarPessoa(@Valid @RequestBody PessoaModelo pm){
 
-        return this.pr.save(pm);
-
+        return this.ps.cadastrarPessoa(pm);
     }
 
     // Rota responsável pela alteração total dos dados
     @PutMapping("/{codigo}")
-    public PessoaModelo alterarPessoaTotal(@PathVariable Long codigo, @RequestBody PessoaModelo pm){
+    public ResponseEntity<PessoaModelo> alterarPessoaTotal(@PathVariable Long codigo,@Valid @RequestBody PessoaModelo pm){
 
-        pm.setCodigo(codigo);
-        return this.pr.save(pm);
+        return this.ps.alterarPessoaTotal(codigo, pm);
     }
 
     // Rota responsável pela alteração parcial dos dados
     @PatchMapping("/{codigo}")
-    public PessoaModelo alteracaoParcial(@PathVariable Long codigo, @RequestBody PessoaModelo pm){
+    public ResponseEntity<PessoaModelo> alteracaoParcial(@PathVariable Long codigo, @RequestBody PessoaModelo pm){
 
-        //Obter o registro contido na tabela
-
-        Optional<PessoaModelo> obj = this.pr.findById(codigo);
-
-        // Converter Optional para PessoaModelo
-
-        PessoaModelo pm2 = obj.get();
-
-        // Verificação
-        if (pm.getNome() != null) {
-            pm2.setNome(pm.getNome());
-        }
-         if (pm.getIdade() != null) {
-            pm2.setIdade(pm.getIdade());
-        }
-         if (pm.getCidade() != null) {
-            pm2.setCidade(pm.getNome());
-        }
-
-        // Retorno
-        return this.pr.save(pm2);
-
-
+        return this.ps.alteracaoParcial(codigo, pm);
     }
 
     //Rota responsável pela remoção de pessoas
 
     @DeleteMapping("/{codigo}")
-    public void removerPessoa(@PathVariable Long codigo){
-        this.pr.deleteById(codigo);
+    public ResponseEntity<Void> removerPessoa(@PathVariable Long codigo){
+
+        return this.ps.removerPessoa(codigo);
     }
+
+    //Rota responsável pelos testes 
+    // @GetMapping("/teste")
+    // public Long teste(){
+
+    //     return this.ps.teste("São Paulo");
+    // }
+
+
     
 
 }
